@@ -31,4 +31,7 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
 
   s.add_development_dependency 'bundler'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'test-unit'
+  s.add_development_dependency 'pry'
 end
