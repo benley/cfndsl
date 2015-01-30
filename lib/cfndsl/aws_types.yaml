@@ -289,6 +289,7 @@ Resources:
     CacheParameterGroupName: String
     CacheSecurityGroupNames: [String]
     CacheSubnetGroupName: String
+    ClusterName: String
     Engine: String
     EngineVersion: String
     NotificationTopicArn: String
@@ -296,6 +297,7 @@ Resources:
     Port: Integer
     PreferrredAvailabilityZone: String
     PreferredMaintenanceWindow: String
+    SnapshotArns: [String]
     VpcSecurityGroupIds: [String]
   "AWS::ElastiCache::ParameterGroup" :
     Properties:
