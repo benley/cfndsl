@@ -512,6 +512,7 @@ Resources:
     Comment: String
   "AWS::Route53::RecordSetGroup" :
    Properties:
+    Comment: String
     HostedZoneId: String
     HostedZoneName: String
     RecordSets: [ JSON ]
@@ -519,6 +520,7 @@ Resources:
    Properties:
     BucketName: String
     AccessControl: String
+    BucketName: String
     WebsiteConfiguration: JSON
     Tags: [ EC2Tag ]
    Attributes:

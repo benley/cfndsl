@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'cfndsl/Errors'
 require 'cfndsl/RefCheck'
 
@@ -12,34 +14,34 @@ module CfnDsl
       RefDefinition.new(value)
     end
 
-    def FnBase64( value )
+    def FnBase64(value)
       ##
       # Equivalent to the CloudFormation template built in function Fn::Base64
-      Fn.new("Base64", value);
+      Fn.new('Base64', value)
     end
 
-    def FnFindInMap( map, key, value)
+    def FnFindInMap(map, key, value)
       ##
       # Equivalent to the CloudFormation template built in function Fn::FindInMap
-      Fn.new("FindInMap", [map,key,value] )
+      Fn.new('FindInMap', [map,key,value])
     end
 
     def FnGetAtt(logicalResource, attribute)
       ##
       # Equivalent to the CloudFormation template built in function Fn::GetAtt
-      Fn.new( "GetAtt", [logicalResource, attribute] )
+      Fn.new('GetAtt', [logicalResource, attribute])
     end
 
     def FnGetAZs(region)
       ##
       # Equivalent to the CloudFormation template built in function Fn::GetAZs
-      Fn.new("GetAZs", region)
+      Fn.new('GetAZs', region)
     end
 
     def FnJoin(string, array)
       ##
       # Equivalent to the CloudFormation template built in function Fn::Join
-      Fn.new("Join", [ string, array] )
+      Fn.new('Join', [string, array])
     end
 
     def FnAnd(array)
@@ -48,25 +50,25 @@ module CfnDsl
       if !array || array.count < 2 || array.count > 10
         raise 'The array passed to Fn::And must have at least 2 elements and no more than 10'
       end
-      Fn.new("And", array)
+      Fn.new('And', array)
     end
 
     def FnEquals(value1, value2)
       ##
       # Equivalent to the Cloudformation template built in function Fn::Equals
-      Fn.new("Equals", [value1, value2])
+      Fn.new('Equals', [value1, value2])
     end
 
     def FnIf(conditionName, trueValue, falseValue)
       ##
       # Equivalent to the Cloudformation template built in function Fn::If
-      Fn.new("If", [conditionName, trueValue, falseValue])
+      Fn.new('If', [conditionName, trueValue, falseValue])
     end
 
     def FnNot(value)
       ##
       # Equivalent to the Cloudformation template built in function Fn::Not
-      Fn.new("Not", value)
+      Fn.new('Not', value)
     end
 
     def FnOr(array)
@@ -75,13 +77,13 @@ module CfnDsl
       if !array || array.count < 2 || array.count > 10
         raise 'The array passed to Fn::Or must have at least 2 elements and no more than 10'
       end
-      Fn.new("Or", array)
+      Fn.new('Or', array)
     end
 
     def FnSelect(index, array)
       ##
       # Equivalent to the CloudFormation template built in function Fn::Select
-      Fn.new("Select", [ index, array] )
+      Fn.new('Select', [index, array])
     end
 
     def FnFormat(string, *arguments)
@@ -108,29 +110,29 @@ module CfnDsl
       # variable name does not exist in the hash, it is used as a Ref
       # to an existing resource or parameter.
       #
-      array = [];
+      array = []
       if(arguments.length == 0 ||
-         (arguments.length == 1 && arguments[0].instance_of?(Hash)) ) then
+         (arguments.length == 1 && arguments[0].instance_of?(Hash)))
         hash = arguments[0] || {}
         string.scan( /(.*?)(%(%|\{([\w:]+)\})|\z)/m ) do |x,y|
-          array.push $1 if $1 && $1 != ""
-          if( $3 == '%' ) then
+          array.push $1 if $1 && $1 != ''
+          if $3 == '%'
             array.push '%'
-          elsif( $3 ) then
-            array.push hash[ $4 ] || hash[ $4.to_sym ] || Ref( $4 )
+          elsif $3
+            array.push hash[$4] || hash[$4.to_sym] || Ref($4)
           end
         end
       else
         string.scan( /(.*?)(%(%|\d+)|\z)/m ) do |x,y|
-          array.push $1 if $1 && $1 != ""
-          if( $3 == '%' ) then
+          array.push $1 if $1 && $1 != ''
+          if $3 == '%'
             array.push '%'
-          elsif( $3 ) then
-            array.push arguments[ $3.to_i ]
+          elsif $3 then
+            array.push arguments[$3.to_i]
           end
         end
       end
-      Fn.new("Join", ["", array])
+      Fn.new('Join', ['', array])
     end
   end
 
@@ -152,45 +154,40 @@ module CfnDsl
       # Instance variables that begin with two underscores have one of
       # them removed.
       hash = {}
-      self.instance_variables.each do |var|
+      instance_variables.each do |var|
         name = var[1..-1]
 
-        if( name =~ /^__/ ) then
+        if name =~ /^__/
           # if a variable starts with double underscore, strip one off
           name = name[1..-1]
-        elsif( name =~ /^_/ ) then
+        elsif name =~ /^_/
           # Hide variables that start with single underscore
           name = nil
         end
 
-        hash[name] = self.instance_variable_get var if name
+        hash[name] = instance_variable_get var if name
       end
       hash.to_json(*a)
     end
 
     def ref_children
-      return self.instance_variables.map { |var| self.instance_variable_get var }
+      instance_variables.map { |var| instance_variable_get var }
     end
 
     def declare(&block)
-      self.instance_eval &block if block_given?
+      instance_eval(&block) if block_given?
     end
 
-    def method_missing(meth,*args,&block)
-      if(args) then
-        arg = "(" + args.inspect[1..-2] + ")"
-      else
-        arg = ""
-      end
-      CfnDsl::Errors.error( "Undefined symbol: #{meth}#{arg}", 1 )
+    def method_missing(meth, *args, &block)
+      arg = args ? '(' + args.inspect[1..-2] + ')' : ''
+      CfnDsl::Errors.error("Undefined symbol: #{meth}#{arg}", 1)
     end
   end
-
 
   class Fn < JSONable
     ##
     # Handles all of the Fn:: objects
-    def initialize( function, argument, refs=[] )
+    def initialize(function, argument, refs = [])
       @function = function
       @argument = argument
       @_refs = refs
@@ -203,11 +200,11 @@ module CfnDsl
     end
 
     def get_references()
-      return @_refs
+      @_refs
     end
 
     def ref_children
-      return [@argument]
+      [@argument]
     end
   end
 
