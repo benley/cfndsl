@@ -81,14 +81,14 @@ module CfnDsl
 
     names = {}
     nametypes = {}
-    self.template_types['Resources'].each_pair do |name, type|
+    template_types['Resources'].each_pair do |name, type|
       # Subclass ResourceDefinition and generate property methods
       klass = Class.new(CfnDsl::ResourceDefinition)
       klassname = name.split('::').join('_')
       type_module.const_set(klassname, klass)
 
       klass.instance_eval do
-        define_method(:initialize) do |*values, &block|
+        define_method(:initialize) do
           @Type = name
         end
       end
@@ -144,8 +144,10 @@ module CfnDsl
           # this only happens if there is an ambiguity
           names[abreve_name] = nil
         else
-          names[abreve_name] = self.type_module.const_get(klassname)
-          CfnDsl::Types.const_set(abreve_name, klass) unless klassname == abreve_name
+          names[abreve_name] = type_module.const_get(klassname)
+          unless klassname == abreve_name
+            CfnDsl::AWSTypes.const_set(abreve_name, klass)
+          end
           nametypes[abreve_name] = name
         end
         parts.shift
@@ -153,7 +155,7 @@ module CfnDsl
     end
 
     # Define property setter methods for each of the unambiguous type names
-    names.each_pair do |typename,type|
+    names.each_pair do |typename, type|
       next unless type
       class_eval do
         CfnDsl.methodNames(typename) do |method|
@@ -180,7 +182,7 @@ module CfnDsl
 
     names = {}
     nametypes = {}
-    self.template_types['Resources'].each_pair do |name, type|
+    template_types['Resources'].each_pair do |name, type|
       # Subclass ResourceDefintion and generate property methods
       klass = Class.new(CfnDsl::ResourceDefinition)
       klassname = name.split('::').join('_')
@@ -236,7 +238,10 @@ module CfnDsl
           # this only happens if there is an ambiguity
           names[abreve_name] = nil
         else
-          names[abreve_name] = self.type_module.const_get(klassname)
+          names[abreve_name] = type_module.const_get(klassname)
+          unless klassname == abreve_name
+            CfnDsl::OSTypes.const_set(abreve_name, klass)
+          end
           nametypes[abreve_name] = name
         end
         parts.shift
